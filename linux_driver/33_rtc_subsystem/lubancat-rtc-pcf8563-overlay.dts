@@ -1,0 +1,61 @@
+/dts-v1/;
+/plugin/;
+
+#include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/pinctrl/rockchip.h>
+#include <dt-bindings/interrupt-controller/irq.h>
+
+/ {
+    fragment@0 {
+        target = <&i2c3>;
+
+        __overlay__ {
+            clock-frequency = <400000>;
+            pinctrl-names = "default";
+            pinctrl-0 = <&i2c3m1_xfer>;
+            #address-cells = <1>;
+            #size-cells = <0>;
+            status = "okay";
+
+            pcf8563: pcf8563@51 {
+                compatible = "fire,pcf8563";
+                reg = <0x51>;
+                pinctrl-names = "default";
+                pinctrl-0 = <&pcf8563_int>;
+                interrupt-parent = <&gpio0>;
+                interrupts = <RK_PB0 IRQ_TYPE_LEVEL_LOW>;
+                wakeup-source;
+            };
+        };
+    };
+
+    fragment@1 {
+        target = <&pinctrl>;
+
+        __overlay__ {
+            rtc {
+                pcf8563_int: pcf8563-int {
+                    rockchip,pins = <0 RK_PB0 RK_FUNC_GPIO &pcfg_pull_up>;
+                };
+            };
+        };
+    };
+
+    fragment@2 {
+        target = <&rk809>;
+
+        __overlay__ {
+            rtc {
+                status = "disabled";
+            };
+        };
+    };
+
+    // fragment@3 {
+    //     target = <&hym8563>;
+
+    //     __overlay__ {
+    //         status = "disabled";
+    //     };
+    // };
+};
